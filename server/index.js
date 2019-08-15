@@ -26,19 +26,23 @@ app.get('/genres', function (req, res) {
   // use this endpoint. you will need your API key from signup: https://api.themoviedb.org/3/genre/movie/list
   axios.get(`https://api.themoviedb.org/3/genre/movie/list?api_key=${config.API_KEY}&language=en-US`)
     .then(function (response) {
-      console.log(config);
       res.status(200).send(JSON.stringify(response.data.genres));
     })
     .catch(function (error) {
-      console.log(error);
       res.sendStatus(500).end("error in the get genres");
     });
 });
 
 app.get('/search', function (req, res) {
-  // use this endpoint to search for movies by genres (using API key): https://api.themoviedb.org/3/discover/movie
-
-  // and sort them by votes (worst first) using the search parameters in themoviedb API
+  let genre = req.query.genre;
+  axios.get(`https://api.themoviedb.org/3/discover/movie?api_key=${config.API_KEY}&language=en-US&sort_by=popularity.asc&include_adult=false&include_video=false&page=1&with_genres=${genre}`)
+    .then(function (response) {
+      console.log("movies: ", response.data);
+      res.status(200).send(JSON.stringify(response.data));
+    }).catch(function (error) {
+      console.log("error in the search request");
+      res.status(500).send(error);
+    })
 });
 
 
@@ -70,3 +74,4 @@ app.post('/delete', function (req, res) {
 app.listen(3000, function () {
   console.log('listening on port 3000!');
 });
+
