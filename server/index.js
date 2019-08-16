@@ -4,6 +4,14 @@ var request = require('request')
 var axios = require('axios');
 var app = express();
 var config = require('../config');
+var mysql = require('mysql');
+
+const db = mysql.createConnection({
+  user: 'root',
+  database: 'movies'
+})
+
+db.connect();
 
 // Sign up and get your moviedb API key here:
 // https://www.themoviedb.org/account/signup
@@ -45,17 +53,35 @@ app.get('/search', function (req, res) {
     })
 });
 
-
 app.post('/save', function (req, res) {
-
-  //save movie as favorite
-
+  db.query(`INSERT INTO favorites SET ?`, req.body, () => {
+    console.log("sent!");
+    db.query(`SELECT * FROM favorites`, (err, data) => {
+      if (err) console.log(err)
+      else {
+        console.log(data)
+        res.status(200).end(JSON.stringify(data));
+      }
+    })
+  })
 });
 
+// db.query(`INSERT INTO favorites (id, poster_path, title, release_date, popularity) VALUES (?)`, [req.body.id, req.body.poster_path, req.body.title, req.body.release_date, req.body.popularity], () => {
+//   console.log("sent!");
+//   res.sendStatus(200);
+// })
+
 app.post('/delete', function (req, res) {
-
-  //remove movie from favorites
-
+  console.log('deleting', req.body.id);
+  db.query(`DELETE FROM favorites WHERE id=${req.body.id}`, () => {
+    db.query(`SELECT * FROM favorites`, (err, data) => {
+      if (err) console.log(err)
+      else {
+        console.log(data)
+        res.status(200).end(JSON.stringify(data));
+      }
+    })
+  })
 });
 
 
